@@ -1,0 +1,190 @@
+assume cs:codesg,ss:stacksg,ds:datasg
+datasg segment
+  db '1975','1976','1977','1978'
+  db '1979','1980','1981','1982'
+  db '1983','1984','1985','1986'
+  db '1987','1988','1989','1990'
+  db '1991','1992','1993','1994'
+  db '1995'
+  dd 16,22,382,1356
+  dd 2390,8000,16000,24486
+  dd 50065,97479,140417,197514
+  dd 345980,590827,803530,1183000
+  dd 1843000,2759000,3753000,4649000
+  dd 5937000
+  dw 3,7,9,13,28,38,130,220
+  dw 476,778,1001,1442,2258,2793,4037,5635
+  dw 8226,11542,14430,15257,17800
+datasg ends
+stacksg segment
+  dw 64 dup (0)
+stacksg ends
+string segment
+ db 30h dup ('0')
+string ends
+codesg segment
+start:    mov ax,stacksg
+          mov ss,ax
+          mov sp,30h
+          mov ax,datasg
+	  mov ds,ax
+          mov bx,00h
+          mov ax,0b800h
+          mov es,ax
+          mov si,0a0h
+          mov cx,15h
+          mov di,01h
+          mov bp,00h
+s:        ;年份
+          push cx
+          
+          mov ax,ds:[bx]
+          mov es:[si],al
+          mov byte ptr es:[si+1],0c1h
+	  mov es:[si+2],ah
+	  mov byte ptr es:[si+3],0c1h
+          mov ax,ds:[bx+02h]
+          mov es:[si+4],al
+  	  mov byte ptr es:[si+5],0c1h
+	  mov es:[si+6],ah
+	  mov byte ptr es:[si+7],0c1h
+	 ;收入 
+	  mov ax,ds:[bx+54h]
+	  mov dx,ds:[bx+56h]
+	  call dtoc
+	  mov dx,di
+          mov dh,dl
+	  mov dl,0ah
+	  mov cl,0c1h
+	  call show_str
+
+          mov ax,ds:[bp+0a8h]
+          mov dx,00h
+          call dtoc
+          mov dx,di
+          mov dh,dl
+          mov dl,15h
+          mov cl,0c1h
+          call show_str
+
+	  mov ax,ds:[bx+54h]
+          mov dx,ds:[bx+56h]
+          mov cx,ds:[bp+0a8h]
+          div cx
+          mov dx,00h
+          call dtoc
+	  mov dx,di
+          mov dh,dl
+          mov dl,1fh
+          mov cl,0c1h
+          call show_str
+
+          add si,0a0h
+	  add bx,04h
+          add bp,02h
+          inc di
+	  pop cx            
+	  loop s
+	  mov ax,string
+          mov ax,4c00h
+          int 21h
+	  
+dtoc:     push bp
+          mov bp,sp
+	  push ax
+          push cx
+	  push ds
+          push bx
+	  push di
+	  push dx
+     	  
+	  mov ax,string
+	  mov ds,ax
+	  mov di,00h
+	  mov ax,[bp-2]
+dtoc1:	  call divdw
+          mov bx,cx
+          mov cx,ax
+	  add bx,30h
+          mov bh,00h
+          push bx
+	  inc di
+          jcxz dtoc2
+	  jmp dtoc1
+dtoc2:    mov cx,di
+          mov di,00h
+dtoc3:    pop bx
+          mov ds:[di],bl
+          inc di
+          loop dtoc3
+dtoc_ret: mov byte ptr ds:[di],0   ;注意这里不需要再di+1了
+          pop dx
+	  pop di
+	  pop bx
+  	  pop ds
+	  pop cx
+	  pop ax
+	  pop bp
+	  ret
+		  
+divdw:    push bp
+          mov bp,sp
+	  push di
+          push bx
+	  push ax  
+          mov ax,dx
+	  mov dx,00h
+          mov bx,0ah
+          div bx  
+	  mov di,ax
+	  pop ax
+          div bx
+          mov cx,dx
+          mov dx,di  
+          pop bx
+	  pop di
+          pop bp
+          ret
+
+show_str: push bp
+          mov bp,sp
+          push ds
+          push dx
+          push cx
+          push ax
+          push bx
+          push si
+          mov bx,dx
+          mov ax,0a0h
+          mul bh
+          mov cx,ax
+          mov ax,02h
+          mul bl
+          add ax,cx
+          mov bx,ax
+	  mov ax,string
+          mov ds,ax
+          
+          mov si,00h
+show_str0:mov ax,[bp-6]
+	  mov ch,00h
+          mov cl,ds:[si]
+          jcxz show_str_ret
+          mov es:[bx+0],cl
+          mov es:[bx+1],al
+          add bx,02h
+          inc si
+          jmp show_str0
+
+show_str_ret:pop si
+             pop bx
+             pop ax
+             pop cx
+             pop dx
+             pop ds
+             pop bp
+             ret
+              
+codesg ends
+end start
+          

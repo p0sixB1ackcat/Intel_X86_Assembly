@@ -1,0 +1,18 @@
+assume cs:code
+code segment
+start:mov ax,0f000h
+      mov ds,ax
+      mov ax,00h
+      mov bx,00h
+      mov cx,20h
+s:    cmp byte ptr ds:[bx],20h
+      jb s0
+      cmp byte ptr ds:[bx],80h
+      ja s0
+      inc ax
+s0:  inc bx
+      loop s
+      mov ax,4c00h
+      int 21h
+code ends
+end start

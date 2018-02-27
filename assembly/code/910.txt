@@ -1,0 +1,9 @@
+assume cs:codesg
+codesg segment
+start: jmp short s
+      ;jmp 2000:1000
+      ;db 128 dup (0)
+       db 127 dup (0)
+s:     mov ax,0ffffh
+codesg ends
+end start

@@ -1,0 +1,53 @@
+assume cs:codesg
+stacksg segment
+ db 16 dup (0)
+stacksg ends
+datasg segment
+  db "welcome to masm!"
+datasg ends
+codesg segment
+start:mov ax,stacksg
+      mov ss,ax
+      mov sp,10h
+      mov ax,datasg
+      mov ds,ax
+      mov bx,0
+      mov ax,0b800h
+      add ax,0ah   ;从下标1开始，0行会覆盖
+      
+      mov es,ax
+      mov si,40h
+      mov cx,10h
+      push cx
+seg0: mov al,ds:[bx]
+      mov es:[si+780h],al
+      mov ah,10001001b
+      mov es:[si+781h],ah
+      inc bx
+      add si,02h
+      loop seg0
+      mov si,40h
+      mov bx,00h
+      pop cx
+      push cx
+seg1: mov al,ds:[bx]
+      mov es:[si+820h],al
+      mov ah,10010111b
+      mov es:[si+821h],ah
+      inc bx
+      add si,02h
+      loop seg1
+      sub bx,10h
+      sub si,20h
+      pop cx
+seg2: mov al,ds:[bx]
+      mov es:[si+8c0h],al
+      mov ah,11110001b
+      mov es:[si+8c1h],ah
+      inc bx
+      add si,02h
+      loop seg2
+      mov ax,4c00h
+      int 21h
+codesg ends
+end start

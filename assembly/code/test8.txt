@@ -1,0 +1,20 @@
+assume cs:codesg
+codesg segment
+        mov ax,4c00h
+        int 21h
+start:  mov ax,00h
+s:      nop 
+        nop
+        mov di,offset s2
+        mov si,offset s
+        mov ax,cs:[di]
+        mov cs:[si],ax
+s0:     jmp short s
+s1:	mov ax,00h
+	int 21h
+        mov ax,00h
+s2:	jmp short s1
+	nop
+codesg ends
+end start
+1111 0110 = 0000 1010 = 0a

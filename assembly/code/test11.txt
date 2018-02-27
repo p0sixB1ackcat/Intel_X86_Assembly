@@ -1,0 +1,85 @@
+assume cs:codesg
+datasg segment
+  db "Beginner's All-purpose Symbolic Instruction Code.",0
+datasg ends
+stacksg segment
+  db 16 dup(0)
+stacksg ends
+codesg segment
+begin:  mov ax,stacksg
+	mov ss,ax
+	mov sp,10h
+	
+	mov ax,datasg
+	mov ds,ax
+	mov si,00h
+	call letterc
+	mov ax,0b800h
+	mov es,ax
+	mov si,00h
+	mov dh,08h
+	mov dl,03h
+	mov cl,10000001b
+	call show_str
+
+	mov ax,4c00h
+	int 21h
+letterc:push bp
+	mov bp,sp
+	push ds
+    	push si
+    	push cx
+	mov cx,00h
+s: 	mov cl,ds:[si]
+	jcxz _ret
+	cmp cl,61h
+	jb next
+	cmp cl,7ah
+	ja next
+	and cl,0dfh
+	mov ds:[si],cl
+next:   inc si
+  	jmp s
+_ret:  	pop cx
+	pop si
+	pop ds
+ 	pop bp
+	ret
+
+
+show_str: push ax
+          push bx
+          push dx
+          push cx
+          mov bx,00h
+          mov al,dh
+          mov dh,0a0h  
+          mul dh            ;求出行数
+          mov dh,00h
+          push ax
+          mov al,02h
+          mov ah,00h
+          mul dl
+          mov dx,ax
+          pop ax
+          add ax,dx
+          mov bx,ax
+show_str_s:mov cl,ds:[si]
+          mov ch,00h
+          jcxz s_ret
+          mov al,ds:[si]                      
+          mov es:[bx],al
+          pop ax
+          mov es:[bx+1],al   ;将栈顶cx的数据给ax，用来读取从外部传来的字符属性参数
+          push ax
+          add bx,02h
+          inc si
+          jmp show_str_s
+s_ret:    pop cx
+          pop dx
+          pop bx
+          pop ax
+          ret
+
+codesg ends
+end begin

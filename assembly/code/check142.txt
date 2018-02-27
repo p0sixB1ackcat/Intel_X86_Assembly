@@ -1,0 +1,23 @@
+assume cs:code
+stack segment
+  db 10h dup (0)
+stack ends
+code segment
+start:  mov ax,stack
+	mov ax,ss
+	mov sp,10h
+	mov ax,08h
+	mov bl,01h
+	mov cl,03h
+	shl bl,cl
+	push ax
+	mul bl
+	mov cx,ax
+	pop ax
+	mov bl,02h
+	mul bl
+	add ax,cx
+	mov ax,4c00h
+	int 21h
+code ends
+end start

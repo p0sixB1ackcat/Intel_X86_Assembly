@@ -1,0 +1,25 @@
+assume cs:code
+a segment
+db 'BaSiC'
+db 'iNfOrMaTion'
+a ends
+code segment
+start:mov ax,a
+      mov ds,ax
+      mov bx,0
+      mov cx,5
+s:    mov al,ds:[bx]
+      and al,11011111b
+      mov ds:[bx],al
+      inc bx
+      loop s
+      mov cx,11
+s0:   mov al,ds:[bx]
+      or  al,00100000b
+      mov ds:[bx],al
+      inc bx
+      loop s0
+      mov ax,4c00h
+      int 21h
+code ends
+end start

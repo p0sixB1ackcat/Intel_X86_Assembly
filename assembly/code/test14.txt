@@ -1,0 +1,63 @@
+assume cs:code,ss:stack
+stack segment
+    db 10h dup (0)
+stack ends
+data segment
+    db 9,8,7,4,2,0
+    db '/','/','/',':',':',0
+data ends
+code segment
+start:    mov ax,stack
+            mov ss,ax
+            mov sp,10h
+            mov ax,0b800h
+            mov es,ax
+	    mov ax,0019h
+            push ax
+            call point
+            mov ax,data
+            mov ds,ax
+            mov si,00h
+            mov cx,06h
+s:          push cx
+            mov al,ds:[si]
+            out 70h,al
+            in al,71h
+            mov ah,al
+            mov cl,04h
+            shr ah,cl
+            and al,0fh
+            add ah,30h
+            add al,30h
+            mov es:[di],ah
+            mov es:[di+2],al
+	    mov al,ds:[si+6]
+	    mov es:[di+4],al
+            inc si
+            add di,06h
+            pop cx
+	    cmp cx,04h
+	    jne noadd
+	    mov al,' '
+	    mov es:[di+6],al
+	    
+	    add di,02h
+noadd:      loop s
+            mov ax,4c00h
+            int 21h
+ point:     push bp
+            mov bp,sp
+            push ax
+            push bx
+            mov ax,0a0h
+            mov bl,0ch
+            mul bl
+            add ax,40h
+            sub ax,[bp+0ah]
+	    mov di,ax
+            pop bx
+            pop ax
+            pop bp
+            ret
+code ends
+end start

@@ -1,0 +1,80 @@
+assume cs:code
+data segment
+    db 'Welcome to masm!',0
+data ends
+code segment
+start:	    
+	    mov dh,0ah
+            mov dl,0ah
+            mov cl,7ch
+            mov ax,data
+            mov ds,ax
+            mov si,00h
+            call install
+            int 7ch
+            mov ax,4c00h
+            int 21h
+install:    push ds
+            push si
+            push es
+            push di
+            push bx
+            push cx
+            pushf
+            mov ax,cs
+            mov ds,ax
+            mov si,offset subcode
+            mov ax,0000h
+            mov es,ax
+            mov ax,0200h
+            mov di,ax
+            mov cx,offset subend - offset subcode
+            cld
+            rep movsb
+            mov ax,007ch
+            mov bl,04h
+            mul bl
+	    mov di,ax
+            mov word ptr es:[di],0200h
+            mov word ptr es:[di+2],es
+            popf
+            pop cx
+            pop bx
+            pop di
+            pop es
+            pop si
+            pop ds
+            ret
+subcode:    push bp
+            mov bp,sp
+            push ax
+            push bx
+            push es
+            push di
+	    mov ax,0a0h
+       	    mul dh
+	    mov bx,ax
+	    mov ax,0002h
+	    mul dl
+	    add bx,ax
+               
+            mov ax,0b800h
+            mov es,ax
+            mov di,bx
+s:          cmp byte ptr ds:[si],0
+            je ok
+            mov al,ds:[si]
+            mov es:[di],al
+	    mov es:[di+1],cl
+            inc si
+            add di,02h
+            jmp s
+ok:         pop di
+            pop es
+            pop bx
+            pop ax
+            pop bp
+            iret
+subend:  nop
+code ends
+end start

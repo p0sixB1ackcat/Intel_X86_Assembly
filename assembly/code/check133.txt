@@ -1,0 +1,63 @@
+assume cs:code
+data segment
+  db 'conversation',0
+data ends
+code segment
+start:   mov ax,data
+	 mov ds,ax
+	 mov si,00h
+	 mov ax,0b800h
+	 mov es,ax
+	 mov ax,0a0h
+	 mov bl,0ch
+	 mul bl
+	 mov di,ax
+	 mov bx,offset s - offset ok
+	 call install
+s:	 cmp byte ptr ds:[si],0
+	 je ok
+	 mov al,ds:[si]
+	 mov es:[di],al
+	 inc si
+	 add di,02h
+	 int 7ch
+ok:	 mov ax,4c00h
+	 int 21h
+install: push bx
+	 push es
+	 push di
+	 push ds
+ 	 push si
+	 pushf
+	 mov ax,0000h
+	 mov es,ax
+	 mov ax,0200h
+	 mov di,ax
+	 mov ax,cs
+	 mov ds,ax
+	 mov si,offset subcode
+	 mov cx,offset subend - offset subcode
+	 cld
+	 rep movsb
+	 mov ax,007ch
+	 mov bl,04h
+	 mul bl
+	 mov di,ax
+	 mov word ptr es:[di],0200h
+	 mov word ptr es:[di+2],es
+	 popf
+	 pop si
+	 pop ds
+	 pop di
+	 pop es
+	 pop bx
+	 ret
+subcode: push bp
+	 mov bp,sp
+	 add [bp+2],bx
+	 pop bp
+	 iret
+subend:  nop
+
+code ends
+end start

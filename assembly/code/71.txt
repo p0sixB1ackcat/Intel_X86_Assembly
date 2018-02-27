@@ -1,0 +1,14 @@
+assume cs:code
+a segment
+  db 'abc'
+a ends
+b segment
+  db 'uvw'
+b ends
+code segment
+start:mov al,'a'
+      mov bl,'b'
+      mov ax,4c00h
+      int 21h
+code ends
+end start

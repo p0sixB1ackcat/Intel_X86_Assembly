@@ -1,0 +1,60 @@
+assume cs:codesg
+stacksg segment
+  db 10h dup(0)
+stacksg ends
+codesg segment
+start:  mov ax,cs
+	mov ds,ax
+	mov si,offset do0
+	mov ax,0000h
+	mov es,ax
+	mov di,0200h
+	mov cx,offset do0end - offset do0
+	cld
+ 	rep movsb
+	call settable
+	;test
+	mov ax,1000h
+ 	mov bl,01h
+	div bl
+	mov ax,4c00h
+	int 21h
+settable:push ax
+	 push es
+	 push di
+	 mov ax,0000h
+	 mov es,ax
+	 mov di,00h
+	 mov word ptr es:[di],0200h
+	 mov word ptr es:[di+2],0000h
+	 pop di
+	 pop es
+	 pop ax
+	 ret
+	 
+do0:	 jmp short do0start
+	 db 'divide error!'
+do0start:mov ax,cs
+	 mov ds,ax
+	 mov si,0202h
+	 mov ax,0b800h
+	 mov es,ax
+	 mov ax,0a0h
+	 mov bl,0ch
+	 mul bl
+	 mov di,ax
+	 add di,50h
+	 sub di,12h
+	 mov cx,0dh
+s:	 mov al,ds:[si]
+	 mov es:[di],al
+	 mov al,0c9h
+	 mov es:[di+1],al
+	 inc si
+	 add di,02h
+ 	 loop s
+         iret
+	 
+do0end: nop
+codesg ends
+end start

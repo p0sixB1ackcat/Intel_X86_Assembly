@@ -1,0 +1,26 @@
+assume cs:code
+stacksg segment
+  dw 8 dup (0)
+stacksg ends
+code segment
+start: mov ax,stacksg
+       mov ss,ax
+       mov sp,10h
+       mov ds,ax
+       mov ax,0
+       call word ptr ds:[0eh]
+       inc ax
+       inc ax
+       inc ax
+	   mov bx,0b800h
+       mov es,bx
+	   mov bl,71h
+	   mov bh,00h
+       mov es:[0a0h],al
+       ;mov es:[0a1h],bl
+       mov es:[0a2h],ah
+       ;mov es:[0a3h],bl
+       mov ax,4c00h
+       int 21h
+code ends
+end start
